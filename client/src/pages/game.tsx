@@ -17,6 +17,7 @@ export default function Game() {
   const [question, setQuestion] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [answer, setAnswer] = useState("");
+  const [questionCount, setQuestionCount] = useState(0); // Track current question number
   const [feedback, setFeedback] = useState<{ message: string; isCorrect: boolean } | null>(null);
   const [timerKey, setTimerKey] = useState(0); // To force timer reset
   const answerInputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +34,7 @@ export default function Game() {
     
     setScore(gameState.score);
     setDifficulty(getDifficultyDisplay(gameState.difficulty));
+    setQuestionCount(gameState.questionCount);
     
     // Generate first question
     nextQuestion();
@@ -67,6 +69,9 @@ export default function Game() {
     setFeedback({ message: "Time's up!", isCorrect: false });
     setScore(result.newScore);
     
+    // Update question count
+    setQuestionCount(prev => prev + 1);
+    
     // Play wrong answer sound
     SoundManager.play(SoundEffect.WRONG);
     
@@ -75,11 +80,28 @@ export default function Game() {
       setDifficulty(getDifficultyDisplay(result.newDifficulty));
     }
     
+    // Check if game is over (10 questions answered)
+    if (result.gameOver) {
+      // Show final message
+      setFeedback({
+        message: "Game complete! Going to results...",
+        isCorrect: true
+      });
+      
+      // End game and go to game over screen after a delay
+      setTimeout(() => {
+        endGame();
+        setLocation("/game-over");
+      }, 2000);
+      
+      return;
+    }
+    
     // Move to next question after delay
     setTimeout(() => {
       nextQuestion();
     }, 1500);
-  }, [nextQuestion]);
+  }, [nextQuestion, setLocation]);
   
   const handleSubmitAnswer = useCallback(() => {
     // Don't allow submission while showing feedback
@@ -95,6 +117,9 @@ export default function Game() {
     // Update score
     setScore(result.newScore);
     
+    // Update question count
+    setQuestionCount(prev => prev + 1);
+    
     // Show feedback
     setFeedback({ 
       message: result.isCorrect ? "Correct! ✅" : "Wrong ❌", 
@@ -109,11 +134,28 @@ export default function Game() {
       setDifficulty(getDifficultyDisplay(result.newDifficulty));
     }
     
+    // Check if game is over (10 questions answered)
+    if (result.gameOver) {
+      // Show final message
+      setFeedback({
+        message: "Game complete! Going to results...",
+        isCorrect: true
+      });
+      
+      // End game and go to game over screen after a delay
+      setTimeout(() => {
+        endGame();
+        setLocation("/game-over");
+      }, 2000);
+      
+      return;
+    }
+    
     // Move to next question after delay
     setTimeout(() => {
       nextQuestion();
     }, 1500);
-  }, [answer, feedback, nextQuestion]);
+  }, [answer, feedback, nextQuestion, setLocation]);
   
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
@@ -135,6 +177,10 @@ export default function Game() {
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm font-medium opacity-80">
               <span id="current-difficulty">{difficulty}</span>
+            </div>
+            
+            <div className="text-sm font-medium text-center">
+              Question: <span className="text-white">{questionCount}/10</span>
             </div>
             
             <div className="text-sm font-medium">
