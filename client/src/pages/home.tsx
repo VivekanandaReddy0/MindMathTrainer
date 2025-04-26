@@ -64,7 +64,7 @@ export default function Home() {
             <p className="text-light opacity-80">Train your brain with math challenges</p>
           </div>
           
-          <div className="space-y-4 mb-8">
+          <div className="space-y-6 mb-8">
             <Link href="/difficulty">
               <button className="w-full bg-primary hover:bg-opacity-90 text-white font-poppins font-semibold py-3 px-6 rounded-xl transition duration-300 button-hover glass">
                 Start Quiz
