@@ -128,8 +128,8 @@ export default function AuthPage() {
                 </button>
                 
                 {loginMutation.isError && (
-                  <p className="text-red-300 text-sm mt-4">
-                    Login failed. Please check your credentials.
+                  <p className="text-red-300 text-sm mt-4 font-semibold">
+                    Login failed. Password doesn't match. Please try again.
                   </p>
                 )}
               </form>

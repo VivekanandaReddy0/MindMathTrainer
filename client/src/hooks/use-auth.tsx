@@ -24,6 +24,13 @@ function useLoginMutation() {
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
+      if (!res.ok) {
+        // Create a custom error so we can detect login failures
+        const errorData = await res.json();
+        const error = new Error(errorData.message || "Invalid username or password");
+        (error as any).isLoginFailure = true;
+        throw error;
+      }
       return await res.json();
     },
     onSuccess: (user: User) => {
@@ -36,9 +43,16 @@ function useLoginMutation() {
     onError: (error: Error) => {
       toast({
         title: "Login failed",
-        description: error.message || "Invalid username or password",
+        description: "Please try again",
         variant: "destructive",
       });
+      
+      // If it's a login failure, reload the page after a short delay
+      if ((error as any).isLoginFailure) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); // Give the user time to see the message
+      }
     },
   });
 }
