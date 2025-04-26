@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes ping {
+      0% { transform: scale(0.2); opacity: 0.8; }
+      80% { transform: scale(1.2); opacity: 0; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    
+    .circle {
+      fill: #4ade80;
+      animation: ping 0.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    
+    .checkmark {
+      fill: none;
+      stroke: white;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: dash 0.8s ease-in-out forwards;
+    }
+    
+    @keyframes dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+  
+  <circle class="circle" cx="50" cy="50" r="40" />
+  <circle class="circle" cx="50" cy="50" r="40" style="animation-delay: 0.3s" />
+  
+  <path class="checkmark" d="M30 50 L45 65 L70 35" />
+</svg>

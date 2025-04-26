@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes ping {
+      0% { transform: scale(0.2); opacity: 0.8; }
+      80% { transform: scale(1.2); opacity: 0; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    
+    .circle {
+      fill: #ef4444;
+      animation: ping 0.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+    
+    .x-mark {
+      fill: none;
+      stroke: white;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: dash 0.8s ease-in-out forwards;
+    }
+    
+    @keyframes dash {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(10px); }
+    }
+    
+    .container {
+      animation: shake 0.5s ease-in-out;
+    }
+  </style>
+  
+  <g class="container">
+    <circle class="circle" cx="50" cy="50" r="40" />
+    <circle class="circle" cx="50" cy="50" r="40" style="animation-delay: 0.3s" />
+    
+    <path class="x-mark" d="M30 30 L70 70 M30 70 L70 30" />
+  </g>
+</svg>
