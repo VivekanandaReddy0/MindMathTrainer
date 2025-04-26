@@ -23,10 +23,16 @@ function useLoginMutation() {
   
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
+      // Use skipErrorCheck to prevent the runtime error overlay
+      const res = await apiRequest("POST", "/api/login", credentials, true);
       if (!res.ok) {
         // Create a custom error so we can detect login failures
-        const errorData = await res.json();
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (e) {
+          errorData = { message: "Invalid username or password" };
+        }
         const error = new Error(errorData.message || "Invalid username or password");
         (error as any).isLoginFailure = true;
         throw error;
@@ -62,7 +68,17 @@ function useRegisterMutation() {
   
   return useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+      const res = await apiRequest("POST", "/api/register", credentials, true);
+      if (!res.ok) {
+        // Handle registration errors
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (e) {
+          errorData = { message: "Username already exists" };
+        }
+        throw new Error(errorData.message || "Could not create account");
+      }
       return await res.json();
     },
     onSuccess: (user: User) => {
@@ -87,7 +103,12 @@ function useLogoutMutation() {
   
   return useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      // Use skipErrorCheck for logout as well
+      const res = await apiRequest("POST", "/api/logout", undefined, true);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Logout failed" }));
+        throw new Error(errorData.message || "Logout failed");
+      }
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);

@@ -11,6 +11,7 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
+  skipErrorCheck: boolean = false
 ): Promise<Response> {
   const res = await fetch(url, {
     method,
@@ -19,7 +20,11 @@ export async function apiRequest(
     credentials: "include",
   });
 
-  await throwIfResNotOk(res);
+  // Only throw errors if not explicitly skipped
+  if (!skipErrorCheck) {
+    await throwIfResNotOk(res);
+  }
+  
   return res;
 }
 
