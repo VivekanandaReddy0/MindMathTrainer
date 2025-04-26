@@ -16,6 +16,7 @@ export function startGame(difficulty: DifficultyLevel): void {
     score: 0,
     correctAnswers: 0,
     wrongAnswers: 0,
+    questionCount: 0, // Initialize question count to 0
     currentQuestion: null,
     consecutiveCorrect: 0,
     consecutiveWrong: 0,
@@ -101,6 +102,9 @@ export function checkAnswer(userAnswer: number): AnswerResult {
     throw new Error("No question to check");
   }
   
+  // Increment question count
+  gameState.questionCount++; 
+  
   const isCorrect = userAnswer === gameState.currentQuestion.expectedAnswer;
   let newDifficulty: DifficultyLevel | undefined;
   
@@ -153,7 +157,9 @@ export function checkAnswer(userAnswer: number): AnswerResult {
   return {
     isCorrect,
     newScore: gameState.score,
-    newDifficulty
+    newDifficulty,
+    // Add flag for game ending at 10 questions
+    gameOver: gameState.questionCount >= 10
   };
 }
 
