@@ -1,8 +1,17 @@
 import React from "react";
-import { LeaderboardEntry } from "@/lib/types";
+import { LeaderboardEntry as LocalLeaderboardEntry } from "@/lib/types";
+import { LeaderboardEntry as DbLeaderboardEntry } from "@shared/schema";
+
+// Create a combined type that works with both local and DB leaderboard entries
+type CombinedEntry = {
+  name: string;
+  score: number;
+  difficulty: string;
+  date: string;
+};
 
 interface LeaderboardEntryProps {
-  entry: LeaderboardEntry;
+  entry: LocalLeaderboardEntry | DbLeaderboardEntry | any;
   rank: number;
   animationDelay?: number;
 }
