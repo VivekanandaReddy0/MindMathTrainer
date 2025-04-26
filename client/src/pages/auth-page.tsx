@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -59,10 +59,11 @@ export default function AuthPage() {
   };
   
   // If user is already logged in, redirect to home
-  if (user) {
-    setLocation("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
   
   return (
     <div className="min-h-screen flex flex-col md:flex-row items-center justify-center p-4">

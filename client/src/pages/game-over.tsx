@@ -1,13 +1,20 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { GlassCard } from "@/components/glass-card";
-import { getGameSummary, saveScore } from "@/lib/game";
+import { getGameSummary } from "@/lib/game";
 import { formatTimeSpent } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GameOver() {
   const [, setLocation] = useLocation();
   const [playerName, setPlayerName] = useState("");
   const [summary, setSummary] = useState<ReturnType<typeof getGameSummary> | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   useEffect(() => {
     const gameSummary = getGameSummary();
@@ -19,17 +26,67 @@ export default function GameOver() {
     }
     
     setSummary(gameSummary);
-  }, [setLocation]);
+    
+    // Pre-fill with username if logged in
+    if (user) {
+      setPlayerName(user.username);
+    }
+  }, [setLocation, user]);
+  
+  const saveScoreMutation = useMutation({
+    mutationFn: async () => {
+      if (!summary) {
+        throw new Error("No game summary to save");
+      }
+      
+      const data = {
+        name: playerName.trim(),
+        score: summary.score,
+        difficulty: summary.highestLevel,
+        date: new Date().toISOString(),
+      };
+      
+      const res = await apiRequest("POST", "/api/leaderboard", data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save score");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate leaderboard queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/leaderboard"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/leaderboard/top"] });
+      
+      toast({
+        title: "Score saved!",
+        description: "Your score has been added to the leaderboard.",
+      });
+      
+      // Navigate to leaderboard
+      setLocation("/leaderboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error saving score",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    }
+  });
   
   const handleSaveScore = () => {
     if (!playerName.trim()) {
-      alert("Please enter your name to save your score.");
+      toast({
+        title: "Name required",
+        description: "Please enter your name to save your score.",
+        variant: "destructive",
+      });
       return;
     }
     
     if (summary) {
-      saveScore(playerName);
-      setLocation("/leaderboard");
+      saveScoreMutation.mutate();
     }
   };
   
@@ -98,9 +155,15 @@ export default function GameOver() {
           <div className="grid grid-cols-2 gap-4">
             <button 
               onClick={handleSaveScore}
-              className="bg-accent hover:bg-opacity-90 text-white font-poppins font-semibold py-3 px-6 rounded-xl transition duration-300 button-hover glass"
+              disabled={saveScoreMutation.isPending}
+              className="bg-accent hover:bg-opacity-90 text-white font-poppins font-semibold py-3 px-6 rounded-xl transition duration-300 button-hover glass flex items-center justify-center"
             >
-              Save Score
+              {saveScoreMutation.isPending ? (
+                <>
+                  <Loader2 className="animate-spin h-5 w-5 mr-2" />
+                  Saving...
+                </>
+              ) : "Save Score"}
             </button>
             
             <button 

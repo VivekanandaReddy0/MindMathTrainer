@@ -9,6 +9,7 @@ import {
   getDifficultyDisplay, 
   endGame
 } from "@/lib/game";
+import { SoundManager, SoundEffect } from "@/lib/sound";
 
 export default function Game() {
   const [, setLocation] = useLocation();
@@ -66,6 +67,9 @@ export default function Game() {
     setFeedback({ message: "Time's up!", isCorrect: false });
     setScore(result.newScore);
     
+    // Play wrong answer sound
+    SoundManager.play(SoundEffect.WRONG);
+    
     // If difficulty changed, update it
     if (result.newDifficulty) {
       setDifficulty(getDifficultyDisplay(result.newDifficulty));
@@ -96,6 +100,9 @@ export default function Game() {
       message: result.isCorrect ? "Correct! ✅" : "Wrong ❌", 
       isCorrect: result.isCorrect 
     });
+    
+    // Play sound effect based on result
+    SoundManager.play(result.isCorrect ? SoundEffect.CORRECT : SoundEffect.WRONG);
     
     // If difficulty changed, update it
     if (result.newDifficulty) {
