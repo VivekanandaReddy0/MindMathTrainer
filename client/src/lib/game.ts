@@ -40,35 +40,55 @@ export function generateQuestion(): Question {
   }
   
   let num1: number, num2: number;
+  let operation: Operation;
   
-  const operations: Operation[] = ["+", "-", "×"];
-  const operation = operations[Math.floor(Math.random() * operations.length)];
+  // Define available operations based on difficulty
+  let availableOperations: Operation[];
   
-  // Determine number ranges based on difficulty
   switch(gameState.difficulty) {
     case "easy":
+      // Easy: Only addition and subtraction with small numbers
+      availableOperations = ["+", "-"];
+      operation = availableOperations[Math.floor(Math.random() * availableOperations.length)];
       num1 = Math.floor(Math.random() * 11); // 0-10
       num2 = Math.floor(Math.random() * 11); // 0-10
       break;
+      
     case "medium":
-      num1 = Math.floor(Math.random() * 91) + 10; // 10-100
-      num2 = Math.floor(Math.random() * 91) + 10; // 10-100
+      // Medium: Addition, subtraction, and multiplication with medium numbers
+      availableOperations = ["+", "-", "×"];
+      operation = availableOperations[Math.floor(Math.random() * availableOperations.length)];
+      
+      if (operation === "×") {
+        // Smaller numbers for multiplication in medium mode
+        num1 = Math.floor(Math.random() * 13) + 2; // 2-14
+        num2 = Math.floor(Math.random() * 13) + 2; // 2-14
+      } else {
+        num1 = Math.floor(Math.random() * 91) + 10; // 10-100
+        num2 = Math.floor(Math.random() * 91) + 10; // 10-100
+      }
       break;
+      
     case "hard":
-      num1 = Math.floor(Math.random() * 901) + 100; // 100-1000
-      num2 = Math.floor(Math.random() * 901) + 100; // 100-1000
+    default:
+      // Hard: All operations with larger numbers, including challenging multiplications
+      availableOperations = ["+", "-", "×"];
+      operation = availableOperations[Math.floor(Math.random() * availableOperations.length)];
+      
+      if (operation === "×") {
+        // Medium-sized numbers for multiplication in hard mode to keep it challenging but solvable
+        num1 = Math.floor(Math.random() * 31) + 10; // 10-40
+        num2 = Math.floor(Math.random() * 31) + 10; // 10-40
+      } else {
+        num1 = Math.floor(Math.random() * 901) + 100; // 100-1000
+        num2 = Math.floor(Math.random() * 901) + 100; // 100-1000
+      }
       break;
   }
   
   // For subtraction, ensure the result is positive
   if (operation === "-" && num1 < num2) {
     [num1, num2] = [num2, num1];
-  }
-  
-  // For multiplication in hard mode, use smaller numbers
-  if (operation === "×" && gameState.difficulty === "hard") {
-    num1 = Math.floor(Math.random() * 31) + 10; // 10-40
-    num2 = Math.floor(Math.random() * 31) + 10; // 10-40
   }
   
   let answer: number;
@@ -164,9 +184,14 @@ export function checkAnswer(userAnswer: number): AnswerResult {
 }
 
 function calculateScore(): number {
-  if (!gameState) {
+  if (!gameState || !gameState.currentQuestion) {
     return 0;
   }
+  
+  // Get the current operation from the question text
+  const operation = gameState.currentQuestion.questionText.includes('+') ? '+' : 
+                    gameState.currentQuestion.questionText.includes('-') ? '-' : 
+                    gameState.currentQuestion.questionText.includes('×') ? '×' : '+';
   
   // Base score depends on difficulty
   let baseScore: number;
@@ -184,14 +209,24 @@ function calculateScore(): number {
       baseScore = 5;
   }
   
+  // Operation multiplier - multiplication is harder, so it earns more points
+  let operationMultiplier = 1.0;
+  if (operation === '×') {
+    operationMultiplier = 1.5; // 50% bonus for multiplication
+  }
+  
   // Calculate time bonus - faster answers get more points
   const timeElapsed = (Date.now() - gameState.questionStartTime) / 1000; // in seconds
   const timeBonus = Math.max(0, Math.floor((30 - timeElapsed) / 3));
   
-  // Add consecutive bonus
-  const consecutiveBonus = gameState.consecutiveCorrect;
+  // Speed bonus - extra points for very quick answers (under 5 seconds)
+  const speedBonus = timeElapsed <= 5 ? 5 : 0;
   
-  return baseScore + timeBonus + consecutiveBonus;
+  // Add consecutive bonus
+  const consecutiveBonus = gameState.consecutiveCorrect * 2;
+  
+  // Final score calculation
+  return Math.floor((baseScore * operationMultiplier) + timeBonus + speedBonus + consecutiveBonus);
 }
 
 export function endGame(): void {

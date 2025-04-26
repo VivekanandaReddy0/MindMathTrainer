@@ -16,7 +16,8 @@ export default function Difficulty() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <GlassCard>
-          <h2 className="text-2xl font-bold font-poppins mb-6 text-white">Select Difficulty</h2>
+          <h2 className="text-2xl font-bold font-poppins mb-2 text-white">Select Difficulty</h2>
+          <p className="text-sm opacity-80 mb-6">Difficulty will adapt based on your performance. Get 5 consecutive correct answers to level up!</p>
           
           <div className="grid grid-cols-1 gap-4 mb-8">
             <button 
@@ -25,6 +26,7 @@ export default function Difficulty() {
             >
               <div className="text-xl mb-1">Easy</div>
               <div className="text-sm opacity-80">Numbers 0-10</div>
+              <div className="text-xs mt-2 opacity-70">Addition and subtraction only</div>
             </button>
             
             <button 
@@ -33,6 +35,7 @@ export default function Difficulty() {
             >
               <div className="text-xl mb-1">Medium</div>
               <div className="text-sm opacity-80">Numbers 10-100</div>
+              <div className="text-xs mt-2 opacity-70">Addition, subtraction, and simple multiplication</div>
             </button>
             
             <button 
@@ -41,6 +44,7 @@ export default function Difficulty() {
             >
               <div className="text-xl mb-1">Hard</div>
               <div className="text-sm opacity-80">Numbers 100-1000</div>
+              <div className="text-xs mt-2 opacity-70">All operations with larger numbers</div>
             </button>
           </div>
           
