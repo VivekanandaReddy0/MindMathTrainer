@@ -80,6 +80,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error retrieving user scores" });
     }
   });
+  
+  // Alternative endpoint for profile page - same functionality as above but with a different route
+  app.get("/api/leaderboard/user", ensureAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const entries = await db.select()
+        .from(leaderboardEntries)
+        .where(eq(leaderboardEntries.userId, user.id))
+        .orderBy(desc(leaderboardEntries.score))
+        .limit(5);
+      
+      res.json(entries);
+    } catch (error) {
+      console.error('Error fetching user leaderboard entries:', error);
+      res.status(500).json({ message: "Error retrieving user scores" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

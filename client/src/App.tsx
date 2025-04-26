@@ -14,6 +14,7 @@ import GameOver from "@/pages/game-over";
 import AuthPage from "@/pages/auth-page";
 import ProfilePage from "@/pages/profile";
 import { UserAvatar } from "@/components/user-avatar";
+import { ReactNode } from "react";
 
 // Layout component that includes the user avatar in the top right
 function Layout({ children }: { children: React.ReactNode }) {
