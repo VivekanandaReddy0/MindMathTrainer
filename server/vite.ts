@@ -1,15 +1,16 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { fileURLToPath } from "url"; // 👈 Added this
+import { dirname } from "path";      // 👈 Added this
 
-// Fix for __dirname in ESM
+// 👇 Fix for import.meta.dirname
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 const viteLogger = createLogger();
 
@@ -51,7 +52,7 @@ export async function setupVite(app: Express, server: Server) {
 
     try {
       const clientTemplate = path.resolve(
-        __dirname,
+        __dirname, // 👈 Fixed here
         "..",
         "client",
         "index.html",
@@ -73,7 +74,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
+  const distPath = path.resolve(__dirname, "public"); // 👈 Fixed here
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
